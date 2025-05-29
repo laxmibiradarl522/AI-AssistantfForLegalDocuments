@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .chat-box {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .chat-box p {
+            padding: 5px;
+            margin: 5px 0;
+        }
+        .chat-box .user-msg {
+            text-align: right;
+            color: #007bff;
+        }
+        .chat-box .bot-msg {
+            text-align: left;
+            color: #333;
+        }
+        .chat-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .nav-bar {
+            width: 100%;
+            max-width: 100%;
+            height: 80px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 40px;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+        button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 20px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .nav-bar img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .nav-bar button {
+            padding: 10px 20px;
+            background-color: #0056b3;
+        }
+
+        .nav-list {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            flex-grow: 0;
+        }
+
+        .nav-list nav {
+            color: #007bff;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .nav-list nav:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav-list {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <img src="/static/logo.png" alt="logo" />
+        <div class="nav-list">
+            <nav onclick="window.location.href='/'">Home</nav>
+            <nav onclick="window.location.href='/chat'">Chat Assistant</nav>
+            <nav onclick="window.location.href='/summary'">Document Summary</nav>
+        </div>
+        <button>Login</button>
+    </div>
+
+    <div class="container">
+        <h1>Ask Your Query</h1>
+        <div class="chat-box" id="chatBox">
+        </div>
+        <textarea id="userInput" class="chat-input" rows="3" placeholder="Ask something..." required></textarea>
+        <button id="sendMessageButton">Send</button>
+    </div>
+
+    <script>
+        document.getElementById('sendMessageButton').addEventListener('click', function() {
+            const userInput = document.getElementById('userInput').value.trim();
+            if (userInput === "") return;
+
+            const userMsg = document.createElement('p');
+            userMsg.classList.add('user-msg');
+            userMsg.innerText = userInput;
+            document.getElementById('chatBox').appendChild(userMsg);
+
+            document.getElementById('userInput').value = '';
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+
+            fetch('/ask_query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMsg = document.createElement('p');
+                botMsg.classList.add('bot-msg');
+                botMsg.innerText = data.answer || "Sorry, I couldn't understand that.";
+                document.getElementById('chatBox').appendChild(botMsg);
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+            })
+            .catch(error => {
+                const botMsg = document.createElement('p');
+                botMsg.classList.add('bot-msg');
+                botMsg.innerText = "An error occurred. Please try again.";
+                document.getElementById('chatBox').appendChild(botMsg);
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+            });
+        });
+    </script>
+
+</body>
+</html>

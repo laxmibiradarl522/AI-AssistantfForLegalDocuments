@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summarize Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 20px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .nav-bar {
+            width: 100%;
+            max-width: 100%;
+            height: 80px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 40px;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .nav-bar img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .nav-bar button {
+            padding: 10px 20px;
+            background-color: #0056b3;
+        }
+
+        .nav-list {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            flex-grow: 0;
+        }
+
+        .nav-list nav {
+            color: #007bff;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .nav-list nav:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav-list {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+        }
+        .submit{
+            position: absolute;
+            margin:auto 0;
+            left: 50%;
+            transform: translate(-50%,0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <img src="/static/logo.png" alt="logo" />
+        <div class="nav-list">
+            <nav onclick="window.location.href='/'">Home</nav>
+            <nav onclick="window.location.href='/chat'">Chat Assistant</nav>
+            <nav onclick="window.location.href='/summary'">Document Summary</nav>
+        </div>
+        <button>Login</button>
+    </div>
+
+    <div class="container">
+        <h1>Upload a File for Summarization</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept=".pdf,.docx" required>
+            <button type="submit" >Upload and Summarize</button>
+        </form>
+
+        <div id="summaryResult" class="summary"></div>
+        <div id="errorResult" class="error"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.summary) {
+                    document.getElementById('summaryResult').innerText = "Summary: " + data.summary;
+                    document.getElementById('errorResult').innerText = "";
+                } else {
+                    document.getElementById('summaryResult').innerText = "";
+                    document.getElementById('errorResult').innerText = data.error || "An error occurred.";
+                }
+            })
+            .catch(error => {
+                document.getElementById('summaryResult').innerText = "";
+                document.getElementById('errorResult').innerText = "An error occurred: " + error.message;
+            });
+        });
+    </script>
+
+</body>
+</html>
+
